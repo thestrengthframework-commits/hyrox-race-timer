@@ -1,95 +1,176 @@
-<!doctype html><html><head><meta charset="utf-8">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="theme-color" content="#111111">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#111318"><title>HYROX Race Timer</title>
+<meta name="theme-color" content="#111318">
+<title>HYROX Race Timer</title>
 <style>
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{width:100%;overflow-x:hidden}body{margin:0;background:#111318;color:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;-webkit-text-size-adjust:100%}main{width:100%;max-width:560px;margin:auto;padding:calc(12px + env(safe-area-inset-top)) 12px calc(24px + env(safe-area-inset-bottom))}.top{display:flex;justify-content:space-between;align-items:center}.top h1{font-size:21px;margin:0}.wake{font-size:11px;color:#63d391}.clock{margin-top:12px;background:#090b0e;border:1px solid #30343d;border-radius:16px;padding:16px;text-align:center}.total{font-size:52px;font-weight:800;font-variant-numeric:tabular-nums}.current{font-size:19px;font-weight:800;margin-top:8px}.sub{font-size:13px;color:#9da3ae;margin-top:3px}.pace{font-size:18px;color:#ff6b35;font-weight:800;margin-top:8px;height:22px}.target{margin-top:10px;background:#22262f;padding:10px;border-radius:10px;font-size:14px}.target b{color:#ff6b35}.buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:11px 0}.buttons button{border:0;border-radius:12px;padding:17px 12px;min-height:56px;font-size:17px;font-weight:800;touch-action:manipulation;cursor:pointer}.start{background:#ff6b35}.finish{background:#63d391}.buttons button:disabled{opacity:.35}.secondary{background:#292e37;color:#fff}.metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:11px}.metric{background:#1b1e25;border:1px solid #30343d;border-radius:11px;text-align:center;padding:9px}.metric strong{display:block;font-size:18px}.metric span{font-size:10px;color:#9da3ae;text-transform:uppercase}.list{background:#1b1e25;border:1px solid #30343d;border-radius:13px;overflow:hidden}.row{display:grid;grid-template-columns:34px 1fr auto;gap:8px;padding:10px 11px;border-bottom:1px solid #30343d;align-items:center}.row:last-child{border:0}.num{color:#9da3ae;font-size:12px}.name{font-weight:800;font-size:14px}.detail{font-size:11px;color:#9da3ae;margin-top:2px}.actual{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}.actual em{display:block;font-size:11px;color:#6ea8fe;font-style:normal}.done{opacity:.7}details{margin-top:11px;background:#1b1e25;border:1px solid #30343d;border-radius:13px;padding:10px 12px}summary{font-weight:800}label{display:block;color:#9da3ae;font-size:12px;margin-top:10px}input{width:100%;margin-top:4px;background:#0d0f13;color:#fff;border:1px solid #30343d;border-radius:8px;padding:12px;font-size:17px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;overflow-x:hidden}
+body{background:#111318;color:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;-webkit-text-size-adjust:100%}
+main{width:100%;max-width:560px;margin:auto;padding:calc(12px + env(safe-area-inset-top)) 12px calc(24px + env(safe-area-inset-bottom))}
+.top{display:flex;justify-content:space-between;align-items:center}.top h1{font-size:21px;margin:0}
+.wake{font-size:11px;color:#63d391}
+.clock{margin-top:12px;background:#090b0e;border:1px solid #30343d;border-radius:16px;padding:16px;text-align:center}
+.total{font-size:52px;font-weight:800;font-variant-numeric:tabular-nums}
+.current{font-size:19px;font-weight:800;margin-top:8px}.sub{font-size:13px;color:#9da3ae;margin-top:3px}
+.pace{font-size:18px;color:#ff6b35;font-weight:800;margin-top:8px;min-height:23px}
+.target{margin-top:10px;background:#22262f;padding:10px;border-radius:10px;font-size:14px}.target b{color:#ff6b35}
+.buttons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:11px 0}
+.buttons button,.bigbutton{border:0;border-radius:12px;padding:17px 12px;min-height:58px;font-size:17px;font-weight:800;touch-action:manipulation;cursor:pointer}
+.start{background:#ff6b35;color:#111}.finish{background:#63d391;color:#111}.secondary{background:#292e37;color:#fff}
+button:disabled{opacity:.35}
+.metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:11px}
+.metric{background:#1b1e25;border:1px solid #30343d;border-radius:11px;text-align:center;padding:9px}
+.metric strong{display:block;font-size:18px}.metric span{font-size:10px;color:#9da3ae;text-transform:uppercase}
+.list{background:#1b1e25;border:1px solid #30343d;border-radius:13px;overflow:hidden}
+.row{display:grid;grid-template-columns:34px 1fr auto;gap:8px;padding:10px 11px;border-bottom:1px solid #30343d;align-items:center}
+.row:last-child{border:0}.num{color:#9da3ae;font-size:12px}.name{font-weight:800;font-size:14px}
+.detail{font-size:11px;color:#9da3ae;margin-top:2px}.actual{text-align:right;font-weight:800;font-variant-numeric:tabular-nums}
+.actual em{display:block;font-size:11px;color:#6ea8fe;font-style:normal}.done{opacity:.7}
+details{margin-top:11px;background:#1b1e25;border:1px solid #30343d;border-radius:13px;padding:10px 12px}
+summary{font-weight:800;cursor:pointer}
+label{display:block;color:#9da3ae;font-size:12px;margin-top:10px}
+input{width:100%;margin-top:4px;background:#0d0f13;color:#fff;border:1px solid #30343d;border-radius:8px;padding:12px;font-size:17px}
+.pace-buttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:9px 0}
+.pace-buttons button{min-height:48px;border:1px solid #555;border-radius:12px;font-weight:800}
+.selected{background:#fff;color:#111}.unselected{background:#292e37;color:#fff}
+.gps{margin-top:11px;background:#1b1e25;border:1px solid #30343d;border-radius:13px;padding:12px}
+.gpshead{display:flex;justify-content:space-between;align-items:center}.gpsstatus{font-size:11px;color:#9da3ae}
+.gpsgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.gpsbox{background:#111318;border-radius:10px;padding:9px;text-align:center}
+.gpsbox span{display:block;color:#9da3ae;font-size:10px;text-transform:uppercase}.gpsbox strong{display:block;font-size:22px;margin-top:2px}
+.gps button{width:100%;margin-top:9px;min-height:48px;border:1px solid #555;border-radius:12px;background:#292e37;color:#fff;font-weight:800}
+.note{font-size:11px;color:#9da3ae;text-align:center;margin:10px 2px 0}
+@media(min-width:700px){.mobile-only{display:none}}
+</style>
+</head>
+<body>
+<main>
+<div class="top"><h1>HYROX RACE TIMER</h1><div class="wake" id="wake">Screen lock: checking</div></div>
 
-.mobile-actions{display:grid;grid-template-columns:1fr;gap:12px;margin:14px 0}
-.mobile-action{width:100%;min-height:72px;border:0;border-radius:16px;font-size:22px;font-weight:800;letter-spacing:.4px;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
-.start-action{background:#fff;color:#111}
-.finish-action{background:#e63946;color:#fff}
-.mobile-action:active{transform:scale(.98)}
-@media(min-width:700px){.mobile-actions{display:none}}
-</style></head><body><main>
-<div class="top"><h1>HYROX RACE TIMER</h1><div class="wake" id="wake">o Screen lock: checking</div></div>
-<div class="clock"><div class="total" id="total">00:00:00</div><div class="current" id="current">READY - RUN 1</div><div class="sub" id="sub">1 km run</div><div class="pace" id="pace"></div><div class="target" id="target">Expected: <b>5:15-5:25 /km</b></div></div>
-<div class="buttons"><button class="start" id="start">START RACE</button><button class="finish" id="finish" disabled>FINISH SEGMENT</button></div>
-<div class="buttons"><button class="secondary" id="undo">UNDO LAST</button><button class="secondary" id="reset">RESET</button></div>
-<div class="metrics"><div class="metric"><strong id="done">0/16</strong><span>segments</span></div><div class="metric"><strong id="runs">0/8</strong><span>runs</span></div><div class="metric"><strong id="project">--:--</strong><span>run target total</span></div></div>
+<div class="clock">
+  <div class="total" id="total">00:00:00</div>
+  <div class="current" id="current">READY - RUN 1</div>
+  <div class="sub" id="sub">1 km run</div>
+  <div class="pace" id="pace"></div>
+  <div class="target" id="target">Expected: <b>5:15-5:25 /km</b></div>
+</div>
+
+<div class="buttons">
+  <button class="start" id="start">START RACE</button>
+  <button class="finish" id="finish" disabled>FINISH SEGMENT</button>
+</div>
+<div class="buttons">
+  <button class="secondary" id="undo">UNDO LAST</button>
+  <button class="secondary" id="reset">RESET</button>
+</div>
+
+<div class="metrics">
+  <div class="metric"><strong id="done">0/16</strong><span>segments</span></div>
+  <div class="metric"><strong id="runs">0/8</strong><span>runs</span></div>
+  <div class="metric"><strong id="project">--:--</strong><span>target run time</span></div>
+</div>
+
 <div class="list" id="list"></div>
 
 <details open>
   <summary>Run pace settings</summary>
   <div style="margin-top:10px;font-size:13px;color:#aaa">Use a slower pace after heavy stations?</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-    <button id="paceYes" type="button" class="secondary" style="min-height:48px;font-weight:800">YES</button>
-    <button id="paceNo" type="button" class="secondary" style="min-height:48px;font-weight:800">NO</button>
+  <div class="pace-buttons">
+    <button id="paceYes" class="selected" type="button">YES</button>
+    <button id="paceNo" class="unselected" type="button">NO</button>
   </div>
 
   <div id="twoPaceSettings">
-    <label>Normal pace - from <input id="normalMin" value="05:15" inputmode="numeric" placeholder="05:15"></label>
-    <label>Normal pace - to <input id="normalMax" value="05:25" inputmode="numeric" placeholder="05:25"></label>
-    <label>Controlled pace - from <input id="controlledMin" value="05:30" inputmode="numeric" placeholder="05:30"></label>
-    <label>Controlled pace - to <input id="controlledMax" value="05:40" inputmode="numeric" placeholder="05:40"></label>
+    <label>Normal pace - from <input id="normalMin" value="05:15" inputmode="numeric" autocomplete="off"></label>
+    <label>Normal pace - to <input id="normalMax" value="05:25" inputmode="numeric" autocomplete="off"></label>
+    <label>Controlled pace - from <input id="controlledMin" value="05:30" inputmode="numeric" autocomplete="off"></label>
+    <label>Controlled pace - to <input id="controlledMax" value="05:40" inputmode="numeric" autocomplete="off"></label>
     <div style="font-size:11px;color:#999;margin-top:7px">Controlled applies after Sled Push, Sled Pull and Sandbag Lunges.</div>
   </div>
 
   <div id="onePaceSettings" style="display:none">
-    <label>Expected pace - from <input id="singleMin" value="05:15" inputmode="numeric" placeholder="05:15"></label>
-    <label>Expected pace - to <input id="singleMax" value="05:25" inputmode="numeric" placeholder="05:25"></label>
+    <label>Expected pace - from <input id="singleMin" value="05:15" inputmode="numeric" autocomplete="off"></label>
+    <label>Expected pace - to <input id="singleMax" value="05:25" inputmode="numeric" autocomplete="off"></label>
   </div>
 </details>
-<div style="font-size:11px;color:#9da3ae;margin:10px 2px 0;text-align:center">Choose your run pace strategy before starting. Your last settings are remembered on this device.<br>For the timer, open this file in Safari or Chrome. The iPhone/iPad file preview may not run the controls.</div></main>
+
+<div class="gps">
+  <div class="gpshead"><strong>GPS RUN GUIDE</strong><span class="gpsstatus" id="gpsStatus">Off</span></div>
+  <div class="gpsgrid">
+    <div class="gpsbox"><span>Run distance</span><strong id="gpsDistance">0.00 km</strong></div>
+    <div class="gpsbox"><span>GPS live pace</span><strong id="gpsPace">--:-- /km</strong></div>
+  </div>
+  <button id="gpsToggle" type="button">ENABLE GPS GUIDE</button>
+  <div style="font-size:11px;color:#999;margin-top:7px">GPS is guidance only. It resets for each run and uses phone location. Manual segment timing remains the official time.</div>
+</div>
+
+<div class="note">Open this page in Safari or Chrome. Add it to the Home Screen for easy access.</div>
+</main>
+
 <script>
 const S=[
-['RUN','Run 1','1 km','normal'],['STATION','SkiErg','1,000 m'],['RUN','Run 2','1 km','normal'],['STATION','Sled Push','50 m - 152 kg'],
-['RUN','Run 3','1 km','controlled'],['STATION','Sled Pull','50 m - 103-105 kg'],['RUN','Run 4','1 km','controlled'],['STATION','Burpee Broad Jumps','80 m'],
-['RUN','Run 5','1 km','normal'],['STATION','Row','1,000 m'],['RUN','Run 6','1 km','normal'],['STATION','Farmers Carry','200 m - 2x24 kg'],
-['RUN','Run 7','1 km','normal'],['STATION','Sandbag Lunges','100 m - 20 kg'],['RUN','Run 8','1 km','controlled'],['STATION','Wall Balls - FINISH','100 - 6 kg']
+['RUN','Run 1','1 km','normal'],
+['STATION','SkiErg','1,000 m'],
+['RUN','Run 2','1 km','normal'],
+['STATION','Sled Push','50 m - 152 kg'],
+['RUN','Run 3','1 km','controlled'],
+['STATION','Sled Pull','50 m - 103 kg'],
+['RUN','Run 4','1 km','controlled'],
+['STATION','Burpee Broad Jumps','80 m'],
+['RUN','Run 5','1 km','normal'],
+['STATION','Row','1,000 m'],
+['RUN','Run 6','1 km','normal'],
+['STATION','Farmers Carry','200 m - 2x24 kg'],
+['RUN','Run 7','1 km','normal'],
+['STATION','Sandbag Lunges','100 m - 20 kg'],
+['RUN','Run 8','1 km','controlled'],
+['STATION','Wall Balls - FINISH','100 - 6 kg']
 ];
 
-let i=0, records=[], running=false, raceStart=0, segmentStart=0, timerId=null, wakeLock=null;
+let i=0,records=[],running=false,raceStart=0,segmentStart=0,timerId=null,wakeLock=null;
 
 function $(id){return document.getElementById(id)}
-function parseTime(v){
-  const a=String(v).trim().split(':').map(Number);
-  if(a.length===2 && a.every(Number.isFinite)) return a[0]*60+a[1];
-  return Number(v)||0;
+function parsePace(v){
+  const m=String(v||'').trim().match(/^(\d{1,2}):(\d{2})$/);
+  if(!m)return 0;
+  return Number(m[1])*60+Number(m[2]);
+}
+function fmtPace(sec){
+  if(!isFinite(sec)||sec<=0)return '--:--';
+  sec=Math.round(sec);
+  return String(Math.floor(sec/60)).padStart(2,'0')+':'+String(sec%60).padStart(2,'0');
 }
 function clock(ms){
-  let s=Math.max(0,Math.floor(ms/1000));
-  const h=Math.floor(s/3600); s%=3600;
-  const m=Math.floor(s/60); s%=60;
+  let s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600);s%=3600;
+  let m=Math.floor(s/60);s%=60;
   return [h,m,s].map(v=>String(v).padStart(2,'0')).join(':');
 }
 function short(ms){
-  let s=Math.max(0,Math.round(ms/1000));
-  const m=Math.floor(s/60); s%=60;
-  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  return fmtPace(Math.max(0,Math.round(ms/1000)));
 }
 function paceSettings(){
-  const two = $('paceYes') && $('paceYes').dataset.selected !== 'false';
+  const two=$('paceYes').dataset.selected!=='false';
   return {
-    useTwo: two,
-    normalMin: $('normalMin')?.value || '05:15',
-    normalMax: $('normalMax')?.value || '05:25',
-    controlledMin: $('controlledMin')?.value || '05:30',
-    controlledMax: $('controlledMax')?.value || '05:40',
-    singleMin: $('singleMin')?.value || '05:15',
-    singleMax: $('singleMax')?.value || '05:25'
+    useTwo:two,
+    normalMin:$('normalMin').value.trim(),normalMax:$('normalMax').value.trim(),
+    controlledMin:$('controlledMin').value.trim(),controlledMax:$('controlledMax').value.trim(),
+    singleMin:$('singleMin').value.trim(),singleMax:$('singleMax').value.trim()
   };
 }
-function range(key){
+function expectedText(kind){
   const p=paceSettings();
   let a,b;
-  if(!p.useTwo){ a=p.singleMin; b=p.singleMax; }
-  else if(key==='normal'){ a=p.normalMin; b=p.normalMax; }
-  else { a=p.controlledMin; b=p.controlledMax; }
-  const A=short(parseTime(a)*1000), B=short(parseTime(b)*1000);
-  return A===B ? A+' /km' : A+'-'+B+' /km';
+  if(!p.useTwo){a=p.singleMin;b=p.singleMax}
+  else if(kind==='controlled'){a=p.controlledMin;b=p.controlledMax}
+  else{a=p.normalMin;b=p.normalMax}
+  if(!parsePace(a)||!parsePace(b))return 'Set pace below';
+  return a===b ? a+' /km' : a+'-'+b+' /km';
 }
 function render(){
   const s=S[i];
@@ -97,312 +178,187 @@ function render(){
     $('current').textContent='FINISHED - WALL BALLS COMPLETE';
     $('sub').textContent='Race complete';
     $('target').textContent='HYROX SIM COMPLETE';
+    $('pace').textContent='';
   }else{
     $('current').textContent=(running?'':'READY - ')+s[1].toUpperCase();
     $('sub').textContent=s[2];
     if(s[0]==='RUN'){
-      $('target').innerHTML='Expected: <b>'+range(s[3])+'</b>';
+      $('target').innerHTML='Expected: <b>'+expectedText(s[3])+'</b>';
     }else{
       $('target').innerHTML='Station: <b>'+s[2]+'</b>';
     }
   }
-
   $('done').textContent=records.length+'/16';
   $('runs').textContent=records.filter(r=>r.type==='RUN').length+'/8';
 
-  let targetRunTotal=0;
-  S.forEach(s=>{
-    if(s[0]==='RUN'){
+  let total=0;
+  S.forEach(x=>{
+    if(x[0]==='RUN'){
       const p=paceSettings();
-      const v=!p.useTwo ? p.singleMin : (s[3]==='normal' ? p.normalMin : p.controlledMin);
-      targetRunTotal+=parseTime(v)*1000;
+      const v=!p.useTwo?p.singleMin:(x[3]==='controlled'?p.controlledMin:p.normalMin);
+      total+=parsePace(v)*1000;
     }
   });
-  $('project').textContent=short(targetRunTotal);
+  $('project').textContent=short(total);
 
-  $('list').innerHTML=S.map((s,n)=>{
+  $('list').innerHTML=S.map((x,n)=>{
     const r=records[n];
-    const detail=s[0]==='RUN'?'Expected '+range(s[3]):s[2];
-    let actual=r?short(r.ms):'-';
-    let pace=(r && s[0]==='RUN')?'<em>'+r.pace.toFixed(2).replace('.',':')+'/km</em>':'';
-    return '<div class="row '+(r?'done':'')+'">'+
-      '<div class="num">'+(n+1)+'</div>'+
-      '<div><div class="name">'+s[1]+'</div><div class="detail">'+detail+'</div></div>'+
-      '<div class="actual">'+actual+pace+'</div></div>';
+    const detail=x[0]==='RUN'?'Expected '+expectedText(x[3]):x[2];
+    const actual=r?short(r.ms):'-';
+    const rp=(r&&x[0]==='RUN')?'<em>'+fmtPace(r.pace)+'/km</em>':'';
+    return '<div class="row '+(r?'done':'')+'"><div class="num">'+(n+1)+'</div>'+
+      '<div><div class="name">'+x[1]+'</div><div class="detail">'+detail+'</div></div>'+
+      '<div class="actual">'+actual+rp+'</div></div>';
   }).join('');
 }
+
 function tick(){
-  if(!running) return;
-  $('total').textContent=clock(performance.now()-raceStart);
-  if(S[i] && S[i][0]==='RUN'){
-    $('pace').textContent='Live pace: '+short(performance.now()-segmentStart)+'/km';
-  }
+  if(!running)return;
+  const now=performance.now();
+  $('total').textContent=clock(now-raceStart);
   timerId=requestAnimationFrame(tick);
 }
+
 async function keepScreenOn(){
   if(!('wakeLock' in navigator)){
-    $('wake').textContent='o Screen lock unavailable';
-    return;
+    $('wake').textContent='Screen lock unavailable';return;
   }
   try{
     wakeLock=await navigator.wakeLock.request('screen');
-    $('wake').textContent='o Screen lock: ON';
-    wakeLock.addEventListener('release',function(){
-      $('wake').textContent='o Screen lock: OFF';
-    });
-  }catch(e){
-    $('wake').textContent='o Screen lock unavailable';
-  }
+    $('wake').textContent='Screen lock: ON';
+  }catch(e){$('wake').textContent='Screen lock unavailable'}
 }
-document.addEventListener('visibilitychange',function(){
-  if(document.visibilityState==='visible' && running) keepScreenOn();
-});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&running)keepScreenOn()});
 
-$('start').addEventListener('click',async function(){
-  if(running) return;
-  if(i>=S.length){i=0;records=[];}
+$('start').addEventListener('click',async()=>{
+  if(running)return;
+  if(i>=S.length){i=0;records=[]}
   running=true;
-  const now=performance.now();
-  raceStart=now;
-  segmentStart=now;
-  $('start').disabled=true;
-  $('finish').disabled=false;
-  $('finish').textContent='FINISH SEGMENT';
+  const now=performance.now();raceStart=now;segmentStart=now;
+  $('start').disabled=true;$('finish').disabled=false;
   $('pace').textContent='';
-  render();
-  await keepScreenOn();
-  tick();
+  gps.resetRun();
+  render();await keepScreenOn();tick();
 });
 
-$('finish').addEventListener('click',function(){
-  if(!running || !S[i]) return;
-
-  const now=performance.now();
-  const ms=now-segmentStart;
-  const s=S[i];
-  const pace=s[0]==='RUN' ? ms/60000 : null;
-
+$('finish').addEventListener('click',()=>{
+  if(!running||!S[i])return;
+  const now=performance.now(),ms=now-segmentStart,s=S[i];
+  const pace=s[0]==='RUN' ? ms/1000 : null;
   records.push({type:s[0],ms:ms,pace:pace});
+  gps.resetRun();
   i++;
-
   if(i>=S.length){
-    running=false;
-    cancelAnimationFrame(timerId);
-    $('finish').disabled=true;
-    $('start').disabled=false;
-    $('total').textContent=clock(now-raceStart);
-    $('pace').textContent='';
-    render();
-    return;
+    running=false;cancelAnimationFrame(timerId);
+    $('finish').disabled=true;$('start').disabled=false;
+    $('total').textContent=clock(now-raceStart);$('pace').textContent='';
+    render();return;
   }
-
-  segmentStart=now;
-  $('pace').textContent='';
-  render();
+  segmentStart=now;$('pace').textContent='';render();
 });
 
-$('undo').addEventListener('click',function(){
-  if(running || records.length===0) return;
-  records.pop();
-  i=Math.max(0,i-1);
-  render();
+$('undo').addEventListener('click',()=>{
+  if(running||!records.length)return;
+  records.pop();i=Math.max(0,i-1);render();
+});
+$('reset').addEventListener('click',()=>{
+  running=false;cancelAnimationFrame(timerId);i=0;records=[];
+  $('total').textContent='00:00:00';$('pace').textContent='';
+  $('start').disabled=false;$('finish').disabled=true;gps.resetRun();render();
 });
 
-$('reset').addEventListener('click',function(){
-  running=false;
-  cancelAnimationFrame(timerId);
-  i=0;
-  records=[];
-  $('total').textContent='00:00:00';
-  $('pace').textContent='';
-  $('start').disabled=false;
-  $('finish').disabled=true;
-  render();
+function setMode(two){
+  $('paceYes').dataset.selected=two?'true':'false';
+  $('paceNo').dataset.selected=two?'false':'true';
+  $('paceYes').className=two?'selected':'unselected';
+  $('paceNo').className=two?'unselected':'selected';
+  $('twoPaceSettings').style.display=two?'block':'none';
+  $('onePaceSettings').style.display=two?'none':'block';
+  savePaces();render();
+}
+function savePaces(){
+  const p=paceSettings();
+  try{localStorage.setItem('hyroxPaceSettingsV3',JSON.stringify(p))}catch(e){}
+}
+function loadPaces(){
+  let p={useTwo:true,normalMin:'05:15',normalMax:'05:25',controlledMin:'05:30',controlledMax:'05:40',singleMin:'05:15',singleMax:'05:25'};
+  try{p=Object.assign(p,JSON.parse(localStorage.getItem('hyroxPaceSettingsV3')||'{}'))}catch(e){}
+  Object.keys(p).forEach(k=>{if($(k)&&k!=='useTwo')$(k).value=p[k]});
+  setMode(p.useTwo!==false);
+}
+$('paceYes').addEventListener('click',()=>setMode(true));
+$('paceNo').addEventListener('click',()=>setMode(false));
+['normalMin','normalMax','controlledMin','controlledMax','singleMin','singleMax'].forEach(id=>{
+  $(id).addEventListener('input',()=>{savePaces();render()});
 });
 
-$('normal').addEventListener('input',render);
-$('controlled').addEventListener('input',render);
+const gps={
+  watchId:null,active:false,last:null,distance:0,lastSampleTime:null,runStartTime:null,
+  resetRun(){
+    this.distance=0;this.last=null;this.lastSampleTime=null;this.runStartTime=null;
+    if(running && S[i] && S[i][0]==='RUN' && this.active)this.startRun();
+    this.updateUI();
+  },
+  startRun(){
+    if(!navigator.geolocation||!this.active||!S[i]||S[i][0]!=='RUN')return;
+    this.last=null;this.distance=0;this.lastSampleTime=null;this.runStartTime=performance.now();
+    $('gpsStatus').textContent='GPS active - seeking signal';
+    if(this.watchId===null){
+      navigator.geolocation.getCurrentPosition(pos=>this.onPosition(pos),err=>this.onError(err),{enableHighAccuracy:true,maximumAge:0,timeout:15000});
+      this.watchId=navigator.geolocation.watchPosition(pos=>this.onPosition(pos),err=>this.onError(err),{enableHighAccuracy:true,maximumAge:1000,timeout:10000});
+    }
+    this.updateUI();
+  },
+  start(){
+    if(!navigator.geolocation){$('gpsStatus').textContent='GPS not supported';return}
+    this.active=true;
+    $('gpsToggle').textContent='STOP GPS GUIDE';
+    if(running&&S[i]&&S[i][0]==='RUN')this.startRun();
+    else {$('gpsStatus').textContent='GPS ready - starts on a run';this.updateUI()}
+  },
+  stop(){
+    this.active=false;
+    if(this.watchId!==null)navigator.geolocation.clearWatch(this.watchId);
+    this.watchId=null;this.last=null;this.runStartTime=null;
+    $('gpsStatus').textContent='Off';$('gpsToggle').textContent='ENABLE GPS GUIDE';this.updateUI();
+  },
+  onError(err){
+    $('gpsStatus').textContent=err&&err.code===1?'Location permission denied':'GPS signal unavailable';
+  },
+  good(pos){return typeof pos.coords.accuracy==='number'&&pos.coords.accuracy<=35},
+  dist(a,b){
+    const R=6371000,rad=Math.PI/180,dLat=(b.lat-a.lat)*rad,dLon=(b.lon-a.lon)*rad;
+    const x=Math.sin(dLat/2)**2+Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dLon/2)**2;
+    return 2*R*Math.asin(Math.sqrt(x));
+  },
+  onPosition(pos){
+    if(!this.active||!running||!S[i]||S[i][0]!=='RUN'||!this.good(pos))return;
+    const pt={lat:pos.coords.latitude,lon:pos.coords.longitude,t:pos.timestamp,acc:pos.coords.accuracy};
+    if(!this.last){this.last=pt;this.runStartTime=performance.now();$('gpsStatus').textContent='GPS active';this.updateUI();return}
+    const d=this.dist(this.last,pt),dt=Math.max(0.1,(pt.t-this.last.t)/1000);
+    // Reject obvious GPS jumps and unrealistic instantaneous speeds.
+    const speed=d/dt;
+    if(d>60||speed>12){this.updateUI();return}
+    if(d>=2){this.distance+=d;this.last=pt;this.lastSampleTime=performance.now()}
+    this.updateUI();
+  },
+  updateUI(){
+    $('gpsDistance').textContent=(this.distance/1000).toFixed(2)+' km';
+    let pace=null;
+    if(this.distance>=40&&this.runStartTime)pace=(performance.now()-this.runStartTime)/1000/(this.distance/1000);
+    $('gpsPace').textContent=pace?fmtPace(pace)+' /km':'--:-- /km';
+    // Put GPS pace into the main running display when available.
+    if(running&&S[i]&&S[i][0]==='RUN'&&pace){
+      $('pace').textContent='Live GPS pace: '+fmtPace(pace)+'/km';
+    }else if(running&&S[i]&&S[i][0]==='RUN'){
+      $('pace').textContent='Live GPS pace: waiting...';
+    }
+  }
+};
+$('gpsToggle').addEventListener('click',()=>gps.active?gps.stop():gps.start());
 
+loadPaces();
 render();
 </script>
-<script>
-(function(){
-  function wire(id, targetId){
-    var a=document.getElementById(id), b=document.getElementById(targetId);
-    if(a && b){
-      a.addEventListener('pointerup', function(e){
-        e.preventDefault();
-        b.click();
-      }, {passive:false});
-      a.addEventListener('touchend', function(e){
-        e.preventDefault();
-        b.click();
-      }, {passive:false});
-    }
-  }
-  wire('mobileStart','startBtn');
-  wire('mobileFinish','finishBtn');
-
-  // Prevent accidental double-taps/zoom on the large timer controls.
-  document.addEventListener('dblclick', function(e){
-    if(e.target && e.target.closest && e.target.closest('.mobile-action')){
-      e.preventDefault();
-    }
-  }, {passive:false});
-})();
-</script>
-
-<script>
-(function(){
-  const gps = {
-    watchId: null,
-    active: false,
-    last: null,
-    distance: 0,
-    points: [],
-    startTime: null
-  };
-
-  function el(id){ return document.getElementById(id); }
-  function setStatus(t){ if(el('gpsStatus')) el('gpsStatus').textContent=t; }
-
-  function paceText(secPerKm){
-    if(!isFinite(secPerKm) || secPerKm <= 0) return '--:-- /km';
-    const total = Math.round(secPerKm);
-    const m = Math.floor(total/60), s = total%60;
-    return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + ' /km';
-  }
-
-  function updateUI(){
-    if(el('gpsDistance')) el('gpsDistance').textContent = (gps.distance/1000).toFixed(2) + ' km';
-    let pace = null;
-    const t = gps.startTime ? (performance.now()-gps.startTime)/1000 : 0;
-    // Use a modest rolling-distance window for a more stable GPS pace.
-    if(t > 5 && gps.distance > 40) pace = t/(gps.distance/1000);
-    if(el('gpsPace')) el('gpsPace').textContent = paceText(pace);
-  }
-
-  function goodPoint(pos){
-    const acc = pos.coords.accuracy;
-    return typeof acc === 'number' && acc <= 35;
-  }
-
-  function haversine(a,b){
-    const R=6371000, rad=Math.PI/180;
-    const dLat=(b.lat-a.lat)*rad, dLon=(b.lon-a.lon)*rad;
-    const x=Math.sin(dLat/2)**2 +
-      Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dLon/2)**2;
-    return 2*R*Math.asin(Math.sqrt(x));
-  }
-
-  function onPosition(pos){
-    if(!gps.active || !goodPoint(pos)) return;
-    const pt={lat:pos.coords.latitude,lon:pos.coords.longitude,acc:pos.coords.accuracy,time:pos.timestamp};
-
-    if(!gps.last){
-      gps.last=pt;
-      gps.points=[pt];
-      gps.startTime=performance.now();
-      setStatus('GPS active');
-      updateUI();
-      return;
-    }
-
-    const d=haversine(gps.last,pt);
-    // Ignore obvious GPS jumps and tiny noise.
-    if(d > 60) { gps.last=pt; return; }
-    if(d >= 3) {
-      gps.distance += d;
-      gps.last=pt;
-    }
-    updateUI();
-  }
-
-  function onError(err){
-    setStatus(err && err.code===1 ? 'Permission denied' : 'GPS unavailable');
-  }
-
-  function startGPS(){
-    if(!navigator.geolocation){
-      setStatus('GPS not supported');
-      return;
-    }
-    gps.active=true;
-    gps.distance=0; gps.last=null; gps.points=[]; gps.startTime=null;
-    setStatus('Requesting GPS...');
-    navigator.geolocation.getCurrentPosition(onPosition,onError,{enableHighAccuracy:true,maximumAge:0,timeout:15000});
-    gps.watchId=navigator.geolocation.watchPosition(onPosition,onError,{
-      enableHighAccuracy:true, maximumAge:1000, timeout:10000
-    });
-    if(el('gpsToggle')) el('gpsToggle').textContent='STOP GPS GUIDE';
-  }
-
-  function stopGPS(){
-    gps.active=false;
-    if(gps.watchId!==null) navigator.geolocation.clearWatch(gps.watchId);
-    gps.watchId=null; gps.last=null; gps.startTime=null;
-    setStatus('Off');
-    if(el('gpsToggle')) el('gpsToggle').textContent='ENABLE GPS GUIDE';
-  }
-
-  if(el('gpsToggle')){
-    el('gpsToggle').addEventListener('click',function(){
-      gps.active ? stopGPS() : startGPS();
-    });
-  }
-
-  // Reset GPS when the existing Reset button is used.
-  const reset=document.getElementById('resetBtn');
-  if(reset) reset.addEventListener('click',stopGPS);
-
-  // Keep GPS active while the screen is visible; Safari may suspend location
-  // updates if the page is backgrounded.
-})();
-</script>
-
-
-
-<script>
-(function(){
-  const KEY='hyroxPaceSettingsV2';
-  const ids=['normalMin','normalMax','controlledMin','controlledMax','singleMin','singleMax'];
-
-  function q(id){return document.getElementById(id);}
-  function save(){
-    const s={useTwo: q('paceYes')?.dataset.selected !== 'false'};
-    ids.forEach(id=>{if(q(id)) s[id]=q(id).value;});
-    try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}
-    render();
-  }
-  function setMode(two, persist=true){
-    if(!q('twoPaceSettings')||!q('onePaceSettings')) return;
-    q('twoPaceSettings').style.display=two?'block':'none';
-    q('onePaceSettings').style.display=two?'none':'block';
-    if(q('paceYes')){
-      q('paceYes').dataset.selected=two?'true':'false';
-      q('paceYes').style.background=two?'#fff':'#292e37';
-      q('paceYes').style.color=two?'#111':'#fff';
-    }
-    if(q('paceNo')){
-      q('paceNo').dataset.selected=two?'false':'true';
-      q('paceNo').style.background=two?'#292e37':'#fff';
-      q('paceNo').style.color=two?'#fff':'#111';
-    }
-    if(persist) save();
-  }
-  function load(){
-    let s={useTwo:true,normalMin:'05:15',normalMax:'05:25',
-      controlledMin:'05:30',controlledMax:'05:40',
-      singleMin:'05:15',singleMax:'05:25'};
-    try{s=Object.assign(s,JSON.parse(localStorage.getItem(KEY)||'{}'));}catch(e){}
-    ids.forEach(id=>{if(q(id)) q(id).value=s[id]||q(id).value;});
-    setMode(s.useTwo!==false,false);
-  }
-
-  if(q('paceYes')) q('paceYes').addEventListener('click',()=>setMode(true));
-  if(q('paceNo')) q('paceNo').addEventListener('click',()=>setMode(false));
-  ids.forEach(id=>{if(q(id)) q(id).addEventListener('input',save);});
-  load();
-})();
-</script>
-</body></html>
+</body>
+</html>
