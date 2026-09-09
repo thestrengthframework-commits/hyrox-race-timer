@@ -38,11 +38,6 @@ label{display:block;font-size:12px;color:#9da3ae;margin-top:10px}
 input{width:100%;margin-top:4px;background:#0d0f13;color:#fff;border:1px solid #30343d;border-radius:8px;padding:12px;font-size:17px}
 .pacebuttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:9px 0}
 .pacebuttons button{min-height:48px;border:1px solid #555}.selected{background:#fff;color:#111}.unselected{background:#292e37;color:#fff}
-.gps{margin-top:11px;background:#1b1e25;border:1px solid #30343d;border-radius:13px;padding:12px}
-.gpshead{display:flex;justify-content:space-between}.gpsstatus{font-size:11px;color:#9da3ae}
-.gpsgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.gpsbox{background:#111318;border-radius:10px;padding:9px;text-align:center}
-.gpsbox span{display:block;color:#9da3ae;font-size:10px;text-transform:uppercase}.gpsbox strong{display:block;font-size:22px;margin-top:2px}
-.gps button{width:100%;margin-top:9px;background:#292e37;color:#fff;border:1px solid #555}
 .note{font-size:11px;color:#9da3ae;text-align:center;margin-top:10px}
 </style>
 </head>
@@ -54,7 +49,6 @@ input{width:100%;margin-top:4px;background:#0d0f13;color:#fff;border:1px solid #
 <div class="total" id="total">00:00:00</div>
 <div class="current" id="current">READY - RUN 1</div>
 <div class="sub" id="sub">1 km run</div>
-<div class="pace" id="pace">Live GPS pace: off</div>
 <div class="target" id="target">Expected: <b>5:15-5:25 /km</b></div>
 </div>
 
@@ -95,15 +89,6 @@ input{width:100%;margin-top:4px;background:#0d0f13;color:#fff;border:1px solid #
 </div>
 </details>
 
-<div class="gps">
-<div class="gpshead"><strong>GPS RUN GUIDE</strong><span class="gpsstatus" id="gpsStatus">Off</span></div>
-<div class="gpsgrid">
-<div class="gpsbox"><span>Run distance</span><strong id="gpsDistance">0.00 km</strong></div>
-<div class="gpsbox"><span>GPS live pace</span><strong id="gpsPace">--:-- /km</strong></div>
-</div>
-<button id="gpsToggle" type="button">ENABLE GPS GUIDE</button>
-<div style="font-size:11px;color:#999;margin-top:7px">GPS is guidance only. It resets for each run. Manual segment timing is the official time.</div>
-</div>
 <div class="note">Open in Safari or Chrome. Add this page to your Home Screen for easy access.</div>
 </main>
 
@@ -187,18 +172,18 @@ $('start').onclick=async()=>{
  if(running)return;
  if(i>=S.length){i=0;records=[]}
  running=true;raceStart=performance.now();segmentStart=raceStart;
- $('start').disabled=true;$('finish').disabled=false;gps.beginRun();render();await screenLock();tick();
+ $('start').disabled=true;$('finish').disabled=false;render();await screenLock();tick();
 };
 $('finish').onclick=()=>{
  if(!running||!S[i])return;
  const now=performance.now(),ms=now-segmentStart,s=S[i];
  records.push({type:s[0],ms,pace:s[0]==='RUN'?ms/1000:null});
- i++;gps.beginRun();
+ i++;
  if(i>=S.length){running=false;cancelAnimationFrame(raf);$('finish').disabled=true;$('start').disabled=false;$('total').textContent=clock(now-raceStart);render();return}
  segmentStart=now;render();
 };
 $('undo').onclick=()=>{if(!running&&records.length){records.pop();i--;render()}};
-$('reset').onclick=()=>{running=false;cancelAnimationFrame(raf);i=0;records=[];$('total').textContent='00:00:00';$('start').disabled=false;$('finish').disabled=true;gps.reset();render()};
+$('reset').onclick=()=>{running=false;cancelAnimationFrame(raf);i=0;records=[];$('total').textContent='00:00:00';$('start').disabled=false;$('finish').disabled=true;render()};
 
 function mode(two){
  $('paceYes').dataset.selected=two?'true':'false';$('paceNo').dataset.selected=two?'false':'true';
@@ -217,59 +202,6 @@ function loadSettings(){
 }
 $('paceYes').onclick=()=>mode(true);$('paceNo').onclick=()=>mode(false);
 ['normalMin','normalMax','controlledMin','controlledMax','singleMin','singleMax'].forEach(id=>$(id).oninput=()=>{saveSettings();render()});
-
-const gps={
- active:false,watchId:null,last:null,distance:0,samples:[],runStart:0,
- reset(){this.distance=0;this.last=null;this.samples=[];this.runStart=0;this.update();},
- beginRun(){
-  this.distance=0;this.last=null;this.samples=[];this.runStart=performance.now();
-  if(this.active)$('gpsStatus').textContent='GPS active - seeking signal';
-  this.update();
- },
- start(){
-  if(!navigator.geolocation){$('gpsStatus').textContent='GPS not supported';return}
-  this.active=true;$('gpsToggle').textContent='STOP GPS GUIDE';
-  if(running&&S[i]&&S[i][0]==='RUN')this.beginRun();else $('gpsStatus').textContent='GPS ready - starts on a run';
-  if(this.watchId===null){
-   navigator.geolocation.getCurrentPosition(pos=>this.pos(pos),e=>this.err(e),{enableHighAccuracy:true,maximumAge:0,timeout:15000});
-   this.watchId=navigator.geolocation.watchPosition(pos=>this.pos(pos),e=>this.err(e),{enableHighAccuracy:true,maximumAge:1000,timeout:10000});
-  }
- },
- stop(){
-  this.active=false;if(this.watchId!==null)navigator.geolocation.clearWatch(this.watchId);this.watchId=null;
-  this.last=null;$('gpsStatus').textContent='Off';$('gpsToggle').textContent='ENABLE GPS GUIDE';this.update();
- },
- err(e){$('gpsStatus').textContent=e&&e.code===1?'Location permission denied':'GPS signal unavailable'},
- good(pos){return Number.isFinite(pos.coords.accuracy)&&pos.coords.accuracy<=35},
- dist(a,b){
-  const R=6371000,r=Math.PI/180,dLat=(b.lat-a.lat)*r,dLon=(b.lon-a.lon)*r;
-  const z=Math.sin(dLat/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dLon/2)**2;
-  return 2*R*Math.asin(Math.sqrt(z));
- },
- pos(pos){
-  if(!this.active||!running||!S[i]||S[i][0]!=='RUN'||!this.good(pos))return;
-  const pt={lat:pos.coords.latitude,lon:pos.coords.longitude,t:pos.timestamp};
-  if(!this.last){this.last=pt;this.runStart=performance.now();this.update();return}
-  const d=this.dist(this.last,pt),dt=Math.max(.1,(pt.t-this.last.t)/1000),speed=d/dt;
-  if(d>60||speed>10)return;
-  if(d>=2){this.distance+=d;this.last=pt;this.samples.push({d,t:performance.now()});}
-  // Keep only the recent ~150 m for a moving live-pace estimate.
-  let sum=0,oldest=performance.now();
-  for(let k=this.samples.length-1;k>=0;k--){sum+=this.samples[k].d;oldest=this.samples[k].t;if(sum>=150)break}
-  this.recentDistance=sum;this.recentTime=Math.max(1,(performance.now()-oldest)/1000);
-  this.update();
- },
- update(){
-  $('gpsDistance').textContent=(this.distance/1000).toFixed(2)+' km';
-  let pace=null;
-  if(this.recentDistance>=30)pace=this.recentTime/(this.recentDistance/1000);
-  $('gpsPace').textContent=pace?paceFmt(pace)+' /km':'--:-- /km';
-  if(running&&S[i]&&S[i][0]==='RUN'){
-   $('pace').textContent=pace?'Live GPS pace: '+paceFmt(pace)+' /km':'Live GPS pace: waiting...';
-  }else $('pace').textContent='Live GPS pace: off';
- }
-};
-$('gpsToggle').onclick=()=>gps.active?gps.stop():gps.start();
 
 loadSettings();render();
 </script>
