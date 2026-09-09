@@ -285,8 +285,15 @@ $('finish').onclick=()=>{
 };
 
 $('undo').onclick=()=>{
- if(!running&&records.length){
-  records.pop();i--;render();
+ if(!records.length)return;
+ records.pop();
+ i=Math.max(0,i-1);
+ if(running){
+  // Resume timing from the moment Undo is pressed.
+  segmentStart=performance.now();
+  render();
+ }else{
+  render();
  }
 };
 
