@@ -7,8 +7,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f4f6f8">
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" sizes="180x180" href="hyrox-timer-icon.png">
+<link rel="manifest" href="manifest.json?v=3">
+<link rel="apple-touch-icon" sizes="180x180" href="hyrox-timer-icon.png?v=3">
 <title>HYROX Race Timer</title>
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -47,7 +47,7 @@ input:focus{outline:2px solid rgba(21,94,239,.18);border-color:#155eef}
 .setup-grid label:last-child{grid-column:1/-1}
 select{width:100%;margin-top:4px;background:#fff;color:#17202a;border:1px solid #98a2b3;border-radius:8px;padding:12px;font-size:17px;font-weight:700}
 </style>
-<link rel="icon" type="image/png" sizes="180x180" href="hyrox-timer-icon.png">
+<link rel="icon" type="image/png" sizes="180x180" href="hyrox-timer-icon.png?v=3">
 </head>
 <body>
 <main>
@@ -383,5 +383,14 @@ loadSettings();
 buildSegments();
 render();
 </script>
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js?v=3').catch(() => {});
+  });
+}
+</script>
+
 </body>
 </html>
