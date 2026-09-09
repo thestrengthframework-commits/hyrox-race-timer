@@ -41,6 +41,8 @@ input:focus{outline:2px solid rgba(21,94,239,.18);border-color:#155eef}
 .note{font-size:11px;color:#475467;text-align:center;margin-top:10px}
 .help{font-size:11px;color:#475467;margin-top:7px;line-height:1.35}
 </style>
+<link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iMzIiIGZpbGw9IiMxNzIwMmEiLz4KPHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iMTYwIiBoZWlnaHQ9IjE2MCIgcng9IjI2IiBmaWxsPSIjZmZmZmZmIi8+Cjx0ZXh0IHg9IjkwIiB5PSI3OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLEhlbHZldGljYSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjI1IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjMTcyMDJhIj5IWVJPWDwvdGV4dD4KPHRleHQgeD0iOTAiIHk9IjExMSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLEhlbHZldGljYSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjI1IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjZmY2YjM1Ij5USU1FUjwvdGV4dD4KPHJlY3QgeD0iNTIiIHk9IjEyNCIgd2lkdGg9Ijc2IiBoZWlnaHQ9IjUiIHJ4PSIyLjUiIGZpbGw9IiMxNzIwMmEiLz4KPC9zdmc+">
+<link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiB2aWV3Qm94PSIwIDAgMTgwIDE4MCI+CjxyZWN0IHdpZHRoPSIxODAiIGhlaWdodD0iMTgwIiByeD0iMzIiIGZpbGw9IiMxNzIwMmEiLz4KPHJlY3QgeD0iMTAiIHk9IjEwIiB3aWR0aD0iMTYwIiBoZWlnaHQ9IjE2MCIgcng9IjI2IiBmaWxsPSIjZmZmZmZmIi8+Cjx0ZXh0IHg9IjkwIiB5PSI3OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLEhlbHZldGljYSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjI1IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjMTcyMDJhIj5IWVJPWDwvdGV4dD4KPHRleHQgeD0iOTAiIHk9IjExMSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1mYW1pbHk9IkFyaWFsLEhlbHZldGljYSxzYW5zLXNlcmlmIiBmb250LXNpemU9IjI1IiBmb250LXdlaWdodD0iOTAwIiBmaWxsPSIjZmY2YjM1Ij5USU1FUjwvdGV4dD4KPHJlY3QgeD0iNTIiIHk9IjEyNCIgd2lkdGg9Ijc2IiBoZWlnaHQ9IjUiIHJ4PSIyLjUiIGZpbGw9IiMxNzIwMmEiLz4KPC9zdmc+">
 </head>
 <body>
 <main>
@@ -80,10 +82,10 @@ input:focus{outline:2px solid rgba(21,94,239,.18);border-color:#155eef}
 
 <div id="twoPaceSettings">
 <label>Normal pace
-<input id="normalMin" value="05:20" inputmode="numeric" maxlength="5"></label>
+<input id="normalMin" value="05:20" placeholder="00:00" inputmode="numeric" maxlength="5"></label>
 <label>Controlled pace <span style="font-weight:600">(after leg-heavy stations)</span>
-<input id="controlledMin" value="05:35" inputmode="numeric" maxlength="5"></label>
-<div class="help">Controlled pace is used after Sled Push, Sled Pull and Sandbag Lunges.</div>
+<input id="controlledMin" value="05:35" placeholder="00:00" inputmode="numeric" maxlength="5"></label>
+<div class="help">Enter pace as MM:SS — for example, type 400 and it becomes 4:00. Controlled pace is used after Sled Push, Sled Pull and Sandbag Lunges.</div>
 </div>
 
 <div id="onePaceSettings" style="display:none">
@@ -278,8 +280,21 @@ function loadSettings(){
 
 $('paceYes').onclick=()=>mode(true);
 $('paceNo').onclick=()=>mode(false);
+function formatPaceInput(el){
+  let raw=el.value.replace(/[^\d]/g,'');
+  if(raw.length>=3){
+    raw=raw.slice(-4);
+    let mins=raw.slice(0,-2).replace(/^0+(?=\d)/,'')||'0';
+    let secs=raw.slice(-2);
+    if(Number(secs)<=59) el.value=mins+':'+secs;
+  }
+}
 ['normalMin','controlledMin','singleMin'].forEach(id=>{
- $(id).addEventListener('input',()=>{saveSettings();render()});
+ $(id).addEventListener('input',()=>{
+   formatPaceInput($(id));
+   saveSettings();
+   render();
+ });
 });
 
 loadSettings();
