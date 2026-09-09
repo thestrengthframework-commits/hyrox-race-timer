@@ -20,7 +20,28 @@
 <div class="buttons"><button class="secondary" id="undo">UNDO LAST</button><button class="secondary" id="reset">RESET</button></div>
 <div class="metrics"><div class="metric"><strong id="done">0/16</strong><span>segments</span></div><div class="metric"><strong id="runs">0/8</strong><span>runs</span></div><div class="metric"><strong id="project">--:--</strong><span>run target total</span></div></div>
 <div class="list" id="list"></div>
-<details><summary>Run targets</summary><label>Normal run target <input id="normal" value="05:15"></label><label>Controlled run target <input id="controlled" value="05:30"></label></details>
+
+<details open>
+  <summary>Run pace settings</summary>
+  <div style="margin-top:10px;font-size:13px;color:#aaa">Use a slower pace after heavy stations?</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
+    <button id="paceYes" type="button" class="secondary" style="min-height:48px;font-weight:800">YES</button>
+    <button id="paceNo" type="button" class="secondary" style="min-height:48px;font-weight:800">NO</button>
+  </div>
+
+  <div id="twoPaceSettings">
+    <label>Normal pace - from <input id="normalMin" value="05:15" inputmode="numeric" placeholder="05:15"></label>
+    <label>Normal pace - to <input id="normalMax" value="05:25" inputmode="numeric" placeholder="05:25"></label>
+    <label>Controlled pace - from <input id="controlledMin" value="05:30" inputmode="numeric" placeholder="05:30"></label>
+    <label>Controlled pace - to <input id="controlledMax" value="05:40" inputmode="numeric" placeholder="05:40"></label>
+    <div style="font-size:11px;color:#999;margin-top:7px">Controlled applies after Sled Push, Sled Pull and Sandbag Lunges.</div>
+  </div>
+
+  <div id="onePaceSettings" style="display:none">
+    <label>Expected pace - from <input id="singleMin" value="05:15" inputmode="numeric" placeholder="05:15"></label>
+    <label>Expected pace - to <input id="singleMax" value="05:25" inputmode="numeric" placeholder="05:25"></label>
+  </div>
+</details>
 <div style="font-size:11px;color:#9da3ae;margin:10px 2px 0;text-align:center">Choose your run pace strategy before starting. Your last settings are remembered on this device.<br>For the timer, open this file in Safari or Chrome. The iPhone/iPad file preview may not run the controls.</div></main>
 <script>
 const S=[
@@ -49,9 +70,26 @@ function short(ms){
   const m=Math.floor(s/60); s%=60;
   return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
 }
+function paceSettings(){
+  const two = $('paceYes') && $('paceYes').dataset.selected !== 'false';
+  return {
+    useTwo: two,
+    normalMin: $('normalMin')?.value || '05:15',
+    normalMax: $('normalMax')?.value || '05:25',
+    controlledMin: $('controlledMin')?.value || '05:30',
+    controlledMax: $('controlledMax')?.value || '05:40',
+    singleMin: $('singleMin')?.value || '05:15',
+    singleMax: $('singleMax')?.value || '05:25'
+  };
+}
 function range(key){
-  const base=parseTime($(key==='normal'?'normal':'controlled').value);
-  return short(base*1000)+'-'+short((base+5)*1000)+' /km';
+  const p=paceSettings();
+  let a,b;
+  if(!p.useTwo){ a=p.singleMin; b=p.singleMax; }
+  else if(key==='normal'){ a=p.normalMin; b=p.normalMax; }
+  else { a=p.controlledMin; b=p.controlledMax; }
+  const A=short(parseTime(a)*1000), B=short(parseTime(b)*1000);
+  return A===B ? A+' /km' : A+'-'+B+' /km';
 }
 function render(){
   const s=S[i];
@@ -75,7 +113,9 @@ function render(){
   let targetRunTotal=0;
   S.forEach(s=>{
     if(s[0]==='RUN'){
-      targetRunTotal+=parseTime($(s[3]==='normal'?'normal':'controlled').value)*1000;
+      const p=paceSettings();
+      const v=!p.useTwo ? p.singleMin : (s[3]==='normal' ? p.normalMin : p.controlledMin);
+      targetRunTotal+=parseTime(v)*1000;
     }
   });
   $('project').textContent=short(targetRunTotal);
@@ -320,59 +360,49 @@ render();
 })();
 </script>
 
+
+
 <script>
 (function(){
-  const KEY='hyroxPaceSettingsV1';
+  const KEY='hyroxPaceSettingsV2';
   const ids=['normalMin','normalMax','controlledMin','controlledMax','singleMin','singleMax'];
 
   function q(id){return document.getElementById(id);}
-  function load(){
-    let s={useTwo:true,normalMin:'00:05:15',normalMax:'00:05:25',
-      controlledMin:'00:05:30',controlledMax:'00:05:40',
-      singleMin:'00:05:15',singleMax:'00:05:25'};
-    try{s=Object.assign(s,JSON.parse(localStorage.getItem(KEY)||'{}'));}catch(e){}
-    ids.forEach(id=>{if(q(id))q(id).value=s[id]||q(id).value;});
-    setMode(s.useTwo!==false);
-  }
   function save(){
-    const s={useTwo:q('paceYes') && q('paceYes').dataset.selected==='true'};
-    ids.forEach(id=>{if(q(id))s[id]=q(id).value;});
+    const s={useTwo: q('paceYes')?.dataset.selected !== 'false'};
+    ids.forEach(id=>{if(q(id)) s[id]=q(id).value;});
     try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}
+    render();
   }
-  function setMode(two){
-    if(!q('twoPaceSettings')||!q('onePaceSettings'))return;
+  function setMode(two, persist=true){
+    if(!q('twoPaceSettings')||!q('onePaceSettings')) return;
     q('twoPaceSettings').style.display=two?'block':'none';
     q('onePaceSettings').style.display=two?'none':'block';
-    if(q('paceYes')) {
+    if(q('paceYes')){
       q('paceYes').dataset.selected=two?'true':'false';
-      q('paceYes').style.background=two?'#fff':'#222';
+      q('paceYes').style.background=two?'#fff':'#292e37';
       q('paceYes').style.color=two?'#111':'#fff';
     }
-    if(q('paceNo')) {
+    if(q('paceNo')){
       q('paceNo').dataset.selected=two?'false':'true';
-      q('paceNo').style.background=two?'#222':'#fff';
+      q('paceNo').style.background=two?'#292e37':'#fff';
       q('paceNo').style.color=two?'#fff':'#111';
     }
-    save();
+    if(persist) save();
   }
-  if(q('paceYes'))q('paceYes').addEventListener('click',()=>setMode(true));
-  if(q('paceNo'))q('paceNo').addEventListener('click',()=>setMode(false));
-  ids.forEach(id=>{if(q(id))q(id).addEventListener('change',save);});
-  load();
+  function load(){
+    let s={useTwo:true,normalMin:'05:15',normalMax:'05:25',
+      controlledMin:'05:30',controlledMax:'05:40',
+      singleMin:'05:15',singleMax:'05:25'};
+    try{s=Object.assign(s,JSON.parse(localStorage.getItem(KEY)||'{}'));}catch(e){}
+    ids.forEach(id=>{if(q(id)) q(id).value=s[id]||q(id).value;});
+    setMode(s.useTwo!==false,false);
+  }
 
-  // Expose a small API for the existing timer code.
-  window.hyroxPaceSettings=function(){
-    let two=q('paceYes') && q('paceYes').dataset.selected==='true';
-    return {
-      useTwo:two,
-      normalMin:q('normalMin')?q('normalMin').value:'00:05:15',
-      normalMax:q('normalMax')?q('normalMax').value:'00:05:25',
-      controlledMin:q('controlledMin')?q('controlledMin').value:'00:05:30',
-      controlledMax:q('controlledMax')?q('controlledMax').value:'00:05:40',
-      singleMin:q('singleMin')?q('singleMin').value:'00:05:15',
-      singleMax:q('singleMax')?q('singleMax').value:'00:05:25'
-    };
-  };
+  if(q('paceYes')) q('paceYes').addEventListener('click',()=>setMode(true));
+  if(q('paceNo')) q('paceNo').addEventListener('click',()=>setMode(false));
+  ids.forEach(id=>{if(q(id)) q(id).addEventListener('input',save);});
+  load();
 })();
 </script>
 </body></html>
