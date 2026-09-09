@@ -42,6 +42,10 @@ input:focus{outline:2px solid rgba(21,94,239,.18);border-color:#155eef}
 .pacebuttons button{min-height:48px;border:1px solid #98a2b3}.selected{background:#17202a;color:#fff;border-color:#17202a}.unselected{background:#fff;color:#17202a}
 .note{font-size:11px;color:#475467;text-align:center;margin-top:10px}
 .help{font-size:11px;color:#475467;margin-top:7px;line-height:1.35}
+
+.setup-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.setup-grid label:last-child{grid-column:1/-1}
+select{width:100%;margin-top:4px;background:#fff;color:#17202a;border:1px solid #98a2b3;border-radius:8px;padding:12px;font-size:17px;font-weight:700}
 </style>
 <link rel="icon" type="image/png" sizes="180x180" href="hyrox-timer-icon.png">
 </head>
@@ -73,6 +77,26 @@ input:focus{outline:2px solid rgba(21,94,239,.18);border-color:#155eef}
 
 <div class="list" id="list"></div>
 
+
+<details open>
+<summary>Race setup</summary>
+<div class="setup-grid">
+  <label>Gender
+    <select id="gender">
+      <option value="male">Male</option>
+      <option value="female">Female</option>
+    </select>
+  </label>
+  <label>Category
+    <select id="category">
+      <option value="open">Open</option>
+      <option value="pro">Pro</option>
+    </select>
+  </label>
+</div>
+<div class="help">Station weights update automatically for your selected division.</div>
+</details>
+
 <details open>
 <summary>Run pace settings</summary>
 <div style="margin-top:10px;font-size:13px;color:#344054;font-weight:700">Use a slower pace after leg-heavy stations?</div>
@@ -99,16 +123,45 @@ input:focus{outline:2px solid rgba(21,94,239,.18);border-color:#155eef}
 </main>
 
 <script>
-const S=[
-['RUN','Run 1','1 km','normal'],['STATION','SkiErg','1,000 m'],
-['RUN','Run 2','1 km','normal'],['STATION','Sled Push','50 m - 152 kg'],
-['RUN','Run 3','1 km','controlled'],['STATION','Sled Pull','50 m - 103 kg'],
-['RUN','Run 4','1 km','controlled'],['STATION','Burpee Broad Jumps','80 m'],
-['RUN','Run 5','1 km','normal'],['STATION','Row','1,000 m'],
-['RUN','Run 6','1 km','normal'],['STATION','Farmers Carry','200 m - 2x24 kg'],
-['RUN','Run 7','1 km','normal'],['STATION','Sandbag Lunges','100 m - 20 kg'],
-['RUN','Run 8','1 km','controlled'],['STATION','Wall Balls - FINISH','100 - 6 kg']
+const BASE=[
+['RUN','Run 1','1 km','normal'],
+['STATION','SkiErg','1,000 m'],
+['RUN','Run 2','1 km','normal'],
+['STATION','Sled Push','50 m'],
+['RUN','Run 3','1 km','controlled'],
+['STATION','Sled Pull','50 m'],
+['RUN','Run 4','1 km','controlled'],
+['STATION','Burpee Broad Jumps','80 m'],
+['RUN','Run 5','1 km','normal'],
+['STATION','Row','1,000 m'],
+['RUN','Run 6','1 km','normal'],
+['STATION','Farmers Carry','200 m'],
+['RUN','Run 7','1 km','normal'],
+['STATION','Sandbag Lunges','100 m'],
+['RUN','Run 8','1 km','controlled'],
+['STATION','Wall Balls - FINISH','100']
 ];
+
+let S=[];
+
+function divisionLoads(){
+  const g=$('gender').value, c=$('category').value;
+  if(g==='male' && c==='open') return {push:152,pull:103,farm:'2x24 kg',lunge:'20 kg',wall:'6 kg'};
+  if(g==='male' && c==='pro')  return {push:202,pull:153,farm:'2x32 kg',lunge:'30 kg',wall:'9 kg'};
+  if(g==='female' && c==='open') return {push:102,pull:78,farm:'2x16 kg',lunge:'10 kg',wall:'4 kg'};
+  return {push:152,pull:103,farm:'2x24 kg',lunge:'20 kg',wall:'6 kg'};
+}
+
+function buildSegments(){
+  const w=divisionLoads();
+  S=BASE.map(x=>x.slice());
+  S[3][2]+=' - '+w.push+' kg incl. sled';
+  S[5][2]+=' - '+w.pull+' kg incl. sled';
+  S[11][2]+=' - '+w.farm;
+  S[13][2]+=' - '+w.lunge;
+  S[15][2]+=' - '+w.wall;
+}
+
 
 let i=0,records=[],running=false,raceStart=0,segmentStart=0,raf=null,wakeLock=null;
 
@@ -200,7 +253,7 @@ document.addEventListener('visibilitychange',()=>{
 
 $('start').onclick=async()=>{
  if(running)return;
- if(i>=S.length){i=0;records=[]}
+ if(i>=S.length){i=0;records=[];buildSegments()}
  running=true;
  raceStart=performance.now();
  segmentStart=raceStart;
@@ -241,6 +294,7 @@ $('reset').onclick=()=>{
  running=false;
  cancelAnimationFrame(raf);
  i=0;records=[];
+ buildSegments();
  $('total').textContent='00:00:00';
  $('start').disabled=false;
  $('finish').disabled=true;
@@ -279,6 +333,32 @@ function loadSettings(){
  }
 }
 
+
+function saveDivision(){
+  localStorage.setItem('hyroxDivision',JSON.stringify({
+    gender:$('gender').value,
+    category:$('category').value,
+  }));
+}
+function loadDivision(){
+  const d=JSON.parse(localStorage.getItem('hyroxDivision')||'null');
+  if(d){
+    $('gender').value=d.gender||'male';
+    $('category').value=d.category||'open';
+  }
+  ['gender','category'].forEach(id=>{
+    $(id).addEventListener('change',()=>{
+      if(running){
+        // Do not alter a race already in progress.
+        return;
+      }
+      saveDivision();
+      buildSegments();
+      render();
+    });
+  });
+}
+
 $('paceYes').onclick=()=>mode(true);
 $('paceNo').onclick=()=>mode(false);
 function formatPaceInput(el){
@@ -298,7 +378,9 @@ function formatPaceInput(el){
  });
 });
 
+loadDivision();
 loadSettings();
+buildSegments();
 render();
 </script>
 </body>
