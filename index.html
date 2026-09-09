@@ -21,7 +21,7 @@
 <div class="metrics"><div class="metric"><strong id="done">0/16</strong><span>segments</span></div><div class="metric"><strong id="runs">0/8</strong><span>runs</span></div><div class="metric"><strong id="project">--:--</strong><span>run target total</span></div></div>
 <div class="list" id="list"></div>
 <details><summary>Run targets</summary><label>Normal run target <input id="normal" value="05:15"></label><label>Controlled run target <input id="controlled" value="05:30"></label></details>
-<div style="font-size:11px;color:#9da3ae;margin:10px 2px 0;text-align:center">For the timer, open this file in Safari or Chrome. The iPhone/iPad file preview may not run the controls.</div></main>
+<div style="font-size:11px;color:#9da3ae;margin:10px 2px 0;text-align:center">Choose your run pace strategy before starting. Your last settings are remembered on this device.<br>For the timer, open this file in Safari or Chrome. The iPhone/iPad file preview may not run the controls.</div></main>
 <script>
 const S=[
 ['RUN','Run 1','1 km','normal'],['STATION','SkiErg','1,000 m'],['RUN','Run 2','1 km','normal'],['STATION','Sled Push','50 m - 152 kg'],
@@ -209,6 +209,170 @@ render();
       e.preventDefault();
     }
   }, {passive:false});
+})();
+</script>
+
+<script>
+(function(){
+  const gps = {
+    watchId: null,
+    active: false,
+    last: null,
+    distance: 0,
+    points: [],
+    startTime: null
+  };
+
+  function el(id){ return document.getElementById(id); }
+  function setStatus(t){ if(el('gpsStatus')) el('gpsStatus').textContent=t; }
+
+  function paceText(secPerKm){
+    if(!isFinite(secPerKm) || secPerKm <= 0) return '--:-- /km';
+    const total = Math.round(secPerKm);
+    const m = Math.floor(total/60), s = total%60;
+    return String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0') + ' /km';
+  }
+
+  function updateUI(){
+    if(el('gpsDistance')) el('gpsDistance').textContent = (gps.distance/1000).toFixed(2) + ' km';
+    let pace = null;
+    const t = gps.startTime ? (performance.now()-gps.startTime)/1000 : 0;
+    // Use a modest rolling-distance window for a more stable GPS pace.
+    if(t > 5 && gps.distance > 40) pace = t/(gps.distance/1000);
+    if(el('gpsPace')) el('gpsPace').textContent = paceText(pace);
+  }
+
+  function goodPoint(pos){
+    const acc = pos.coords.accuracy;
+    return typeof acc === 'number' && acc <= 35;
+  }
+
+  function haversine(a,b){
+    const R=6371000, rad=Math.PI/180;
+    const dLat=(b.lat-a.lat)*rad, dLon=(b.lon-a.lon)*rad;
+    const x=Math.sin(dLat/2)**2 +
+      Math.cos(a.lat*rad)*Math.cos(b.lat*rad)*Math.sin(dLon/2)**2;
+    return 2*R*Math.asin(Math.sqrt(x));
+  }
+
+  function onPosition(pos){
+    if(!gps.active || !goodPoint(pos)) return;
+    const pt={lat:pos.coords.latitude,lon:pos.coords.longitude,acc:pos.coords.accuracy,time:pos.timestamp};
+
+    if(!gps.last){
+      gps.last=pt;
+      gps.points=[pt];
+      gps.startTime=performance.now();
+      setStatus('GPS active');
+      updateUI();
+      return;
+    }
+
+    const d=haversine(gps.last,pt);
+    // Ignore obvious GPS jumps and tiny noise.
+    if(d > 60) { gps.last=pt; return; }
+    if(d >= 3) {
+      gps.distance += d;
+      gps.last=pt;
+    }
+    updateUI();
+  }
+
+  function onError(err){
+    setStatus(err && err.code===1 ? 'Permission denied' : 'GPS unavailable');
+  }
+
+  function startGPS(){
+    if(!navigator.geolocation){
+      setStatus('GPS not supported');
+      return;
+    }
+    gps.active=true;
+    gps.distance=0; gps.last=null; gps.points=[]; gps.startTime=null;
+    setStatus('Requesting GPS...');
+    navigator.geolocation.getCurrentPosition(onPosition,onError,{enableHighAccuracy:true,maximumAge:0,timeout:15000});
+    gps.watchId=navigator.geolocation.watchPosition(onPosition,onError,{
+      enableHighAccuracy:true, maximumAge:1000, timeout:10000
+    });
+    if(el('gpsToggle')) el('gpsToggle').textContent='STOP GPS GUIDE';
+  }
+
+  function stopGPS(){
+    gps.active=false;
+    if(gps.watchId!==null) navigator.geolocation.clearWatch(gps.watchId);
+    gps.watchId=null; gps.last=null; gps.startTime=null;
+    setStatus('Off');
+    if(el('gpsToggle')) el('gpsToggle').textContent='ENABLE GPS GUIDE';
+  }
+
+  if(el('gpsToggle')){
+    el('gpsToggle').addEventListener('click',function(){
+      gps.active ? stopGPS() : startGPS();
+    });
+  }
+
+  // Reset GPS when the existing Reset button is used.
+  const reset=document.getElementById('resetBtn');
+  if(reset) reset.addEventListener('click',stopGPS);
+
+  // Keep GPS active while the screen is visible; Safari may suspend location
+  // updates if the page is backgrounded.
+})();
+</script>
+
+<script>
+(function(){
+  const KEY='hyroxPaceSettingsV1';
+  const ids=['normalMin','normalMax','controlledMin','controlledMax','singleMin','singleMax'];
+
+  function q(id){return document.getElementById(id);}
+  function load(){
+    let s={useTwo:true,normalMin:'00:05:15',normalMax:'00:05:25',
+      controlledMin:'00:05:30',controlledMax:'00:05:40',
+      singleMin:'00:05:15',singleMax:'00:05:25'};
+    try{s=Object.assign(s,JSON.parse(localStorage.getItem(KEY)||'{}'));}catch(e){}
+    ids.forEach(id=>{if(q(id))q(id).value=s[id]||q(id).value;});
+    setMode(s.useTwo!==false);
+  }
+  function save(){
+    const s={useTwo:q('paceYes') && q('paceYes').dataset.selected==='true'};
+    ids.forEach(id=>{if(q(id))s[id]=q(id).value;});
+    try{localStorage.setItem(KEY,JSON.stringify(s));}catch(e){}
+  }
+  function setMode(two){
+    if(!q('twoPaceSettings')||!q('onePaceSettings'))return;
+    q('twoPaceSettings').style.display=two?'block':'none';
+    q('onePaceSettings').style.display=two?'none':'block';
+    if(q('paceYes')) {
+      q('paceYes').dataset.selected=two?'true':'false';
+      q('paceYes').style.background=two?'#fff':'#222';
+      q('paceYes').style.color=two?'#111':'#fff';
+    }
+    if(q('paceNo')) {
+      q('paceNo').dataset.selected=two?'false':'true';
+      q('paceNo').style.background=two?'#222':'#fff';
+      q('paceNo').style.color=two?'#fff':'#111';
+    }
+    save();
+  }
+  if(q('paceYes'))q('paceYes').addEventListener('click',()=>setMode(true));
+  if(q('paceNo'))q('paceNo').addEventListener('click',()=>setMode(false));
+  ids.forEach(id=>{if(q(id))q(id).addEventListener('change',save);});
+  load();
+
+  // Expose a small API for the existing timer code.
+  window.hyroxPaceSettings=function(){
+    let two=q('paceYes') && q('paceYes').dataset.selected==='true';
+    return {
+      useTwo:two,
+      normalMin:q('normalMin')?q('normalMin').value:'00:05:15',
+      normalMax:q('normalMax')?q('normalMax').value:'00:05:25',
+      controlledMin:q('controlledMin')?q('controlledMin').value:'00:05:30',
+      controlledMax:q('controlledMax')?q('controlledMax').value:'00:05:40',
+      singleMin:q('singleMin')?q('singleMin').value:'00:05:15',
+      singleMax:q('singleMax')?q('singleMax').value:'00:05:25'
+    };
+  };
 })();
 </script>
 </body></html>
