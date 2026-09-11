@@ -1,16 +1,1 @@
-{
-  "name": "HYROX Timer",
-  "short_name": "HYROX Timer",
-  "start_url": "./",
-  "display": "standalone",
-  "background_color": "#f4f6f8",
-  "theme_color": "#f4f6f8",
-  "icons": [
-    {
-      "src": "hyrox-timer-icon.png",
-      "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ]
-}
+{"name":"Strength Framework Race Timer","short_name":"Race Timer","start_url":"./","display":"standalone","background_color":"#f4f6f8","theme_color":"#f4f6f8","orientation":"portrait","icons":[{"src":"hyrox-timer-icon.png","sizes":"180x180","type":"image/png"}]}
