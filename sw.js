@@ -1,4 +1,4 @@
-const CACHE = "strength-framework-race-timer-v7";
+const CACHE = "strength-framework-race-timer-v8";
 
 const ASSETS = [
   "./",
