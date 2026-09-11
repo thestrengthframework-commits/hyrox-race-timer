@@ -32,6 +32,26 @@ function buildHybrid(){const g=$('gender').value,c=$('category').value,S0=RACES.
 function buildMac(){const g=$('gender').value,c=$('category').value,f=g==='female',mix=g==='mixed';const fmt=(m,w)=>mix?`${m} men / ${w} women`:f?w:m;S=RACES[raceKey].segments.map(x=>x.slice());S[1][2]=`${c==='doubles'?'100':'80'} × ${fmt('15 kg','9 kg')}`;S[3][2]=`100 m × ${fmt('20 kg','10 kg')}`;S[5][2]=`30 × ${fmt('2 × 10 kg','2 × 5 kg')}`;S[9][2]=`200 m × ${fmt('15 kg','10 kg')}`;S[11][2]=`80 × ${fmt('32 kg','24 kg')}`;S[15][2]=`50 × ${fmt('9 kg','6 kg')}`;S[17][2]=`250 m × ${fmt('25 kg','15 kg')}`;S[19][2]=`80 × ${fmt('9 kg','6 kg')}`}
 function buildGauntlet(){const g=$('gender').value,c=$('category').value,f=g==='female',mix=g==='mixed',pairs=c==='pairs';const fmt=(m,w)=>mix?`${m} men / ${w} women`:f?w:m;const bike=f?(pairs?'3 km':'2.5 km'):(pairs?'4 km':'3 km');if(!pairs){S=[['RUN','Run 1','1 km','normal'],['STATION','Hurdles',`16 hurdles — ${fmt('30 kg','20 kg')}`,'high'],['STATION','Sled Push',`4 × 12.5 m — ${fmt('175 kg','125 kg')}`,'high'],['STATION','Sled Pull',`4 × 12.5 m — ${fmt('125 kg','90 kg')}`,'medium'],['RUN','Run 2','1 km','controlled'],['STATION','Bike',bike,'high'],['STATION','Walking Lunges',`120 m — ${fmt('20 kg','10 kg')}`,'high'],['STATION','SkiErg',f?'1.25 km':'1.5 km','low'],['RUN','Run 3','1 km','controlled'],['STATION','Burpee Broad Jumps','80 m','high'],['STATION','Row',f?'1.25 km':'1.5 km','low'],['RUN','Run 4','1 km','normal']]}else{S=[['RUN','Run 1','1 km','normal'],['STATION','Hurdles',`24 hurdles — ${fmt('30 kg','20 kg')}`,'high'],['STATION','Sled Push',`4 × 12.5 m — ${fmt('175 kg','125 kg')}`,'high'],['STATION','Sled Pull',`4 × 12.5 m — ${fmt('125 kg','90 kg')}`,'medium'],['RUN','Run 2','1 km','controlled'],['STATION','Bike + Walking Lunges',`${bike} bike + 80 m lunges each — ${fmt('20 kg','10 kg')}`,'high'],['STATION','SkiErg + Farmers Hold',`${f?'1.75 km':'2 km'} SkiErg + ${fmt('2 × 24 kg','2 × 16 kg')} hold`,'medium'],['RUN','Run 3','1 km','controlled'],['STATION','Row + Burpee Broad Jumps',`${f?'2 km':'2.5 km'} row + 60 m BBJ each`,'high'],['RUN','Run 4','1 km','normal']]}}
 
+function build(){
+  updateCategoryUI();
+  if(raceKey==='hyrox'){
+    S=RACES.hyrox.segments.map(x=>x.slice());
+    const d=divisionLoads();
+    S[3][2]=`50 m — ${d.push} kg incl. sled`;
+    S[5][2]=`50 m — ${d.pull} kg incl. sled`;
+    S[9][2]='1,000 m';
+    S[11][2]=`200 m — ${d.farm}`;
+    S[13][2]=`100 m — ${d.lunge}`;
+    S[15][2]=`100 × ${d.wall}`;
+  } else if(raceKey==='hybrid'){
+    buildHybrid();
+  } else if(raceKey==='mactuffx' || raceKey==='mactuff2x'){
+    buildMac();
+  } else if(raceKey==='gauntlet'){
+    buildGauntlet();
+  }
+}
+
 function render(){let s=S[i];$('current').textContent=s?(running?'':'READY - ')+s[1].toUpperCase():'RACE COMPLETE';$('sub').textContent=s?s[2]:RACES[raceKey].name;$('target').innerHTML=s?(s[0]==='RUN'?'Expected: <b>'+expected(s[3])+'</b>':'Station: <b>'+s[2]+'</b>'):'<b>FINISHED</b>';$('done').textContent=records.length+'/'+S.length;$('runs').textContent=records.filter(r=>r.type==='RUN').length+'/'+S.filter(x=>x[0]==='RUN').length;$('project').textContent=projectedRunTime();$('list').innerHTML=S.map((x,n)=>{let r=records[n],detail=x[0]==='RUN'?'Expected '+expected(x[3]):x[2];return`<div class="row ${r?'done':''}"><div class="num">${n+1}</div><div><div class="name">${x[1]}</div><div class="detail">${detail}</div></div><div class="actual">${r?clock(r.ms):'-'}${r&&x[0]==='RUN'?'<em>'+paceFmt(r.ms/1000*(1000/Number((x[2].match(/\d+/)||['1000'])[0])))+'/km</em>':''}</div></div>`}).join('');renderHistory()}
 function renderHistory(){let a=JSON.parse(localStorage.getItem(HK)||'[]').filter(x=>x.raceKey===raceKey);if(!a.length){$('history').innerHTML='<div class="help" style="padding-top:8px">No results recorded for this race yet.</div>';return}let best=Math.min(...a.map(x=>x.totalMs));$('history').innerHTML=a.map(x=>{let d=new Date(x.date).toLocaleDateString(undefined,{day:'numeric',month:'short',year:'numeric'});return`<div class="history-item"><div><div class="history-main">${d} — ${clock(x.totalMs)}</div><div class="history-meta">${x.category||''}</div></div>${x.totalMs===best?'<div class="pb">PB</div>':''}</div>`}).join('')}
 function saveResult(){let a=JSON.parse(localStorage.getItem(HK)||'[]');a.unshift({date:new Date().toISOString(),raceKey,totalMs:performance.now()-raceStart,category:`${$('gender').value} ${$('category').value}`});localStorage.setItem(HK,JSON.stringify(a.slice(0,50)))}function tick(){if(running){$('total').textContent=clock(performance.now()-raceStart);raf=requestAnimationFrame(tick)}}async function lock(){if(!('wakeLock'in navigator)){$('wake').textContent='Screen lock unavailable';return}try{await navigator.wakeLock.request('screen');$('wake').textContent='Screen lock: ON'}catch(e){$('wake').textContent='Screen lock unavailable'}}document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&running)lock()});
